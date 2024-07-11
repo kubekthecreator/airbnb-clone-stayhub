@@ -1,0 +1,8 @@
+spring:
+  liquibase:
+    contexts: dev
+  datasource:
+    url: jdbc:postgresql://localhost:5432/airbnb_clone
+    username: postgres
+    password: perdziak1229
+    driver-class-name: org.postgresql.Driver

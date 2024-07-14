@@ -1,7 +1,9 @@
 package com.kubekthecreator.airbnb_clone_back.listing.application;
 
+import com.kubekthecreator.airbnb_clone_back.booking.application.BookingService;
 import com.kubekthecreator.airbnb_clone_back.listing.application.dto.DisplayCardListingDTO;
 import com.kubekthecreator.airbnb_clone_back.listing.application.dto.DisplayListingDTO;
+import com.kubekthecreator.airbnb_clone_back.listing.application.dto.SearchDTO;
 import com.kubekthecreator.airbnb_clone_back.listing.application.dto.sub.LandlordListingDTO;
 import com.kubekthecreator.airbnb_clone_back.listing.domain.BookingCategory;
 import com.kubekthecreator.airbnb_clone_back.listing.domain.Listing;
@@ -11,6 +13,7 @@ import com.kubekthecreator.airbnb_clone_back.sharedkernel.service.State;
 import com.kubekthecreator.airbnb_clone_back.user.application.UserService;
 import com.kubekthecreator.airbnb_clone_back.user.application.dto.ReadUserDTO;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,13 +30,14 @@ public class TenantService {
     private final ListingMapper listingMapper;
 
     private final UserService userService;
-//    private final BookingService bookingService;
+    private final BookingService bookingService;
 
 
-    public TenantService(ListingRepository listingRepository, ListingMapper listingMapper, UserService userService) {
+    public TenantService(ListingRepository listingRepository, ListingMapper listingMapper, UserService userService, BookingService bookingService) {
         this.listingRepository = listingRepository;
         this.listingMapper = listingMapper;
         this.userService = userService;
+        this.bookingService = bookingService;
     }
 
     public Page<DisplayCardListingDTO> getAllByCategory(Pageable pageable, BookingCategory category) {
@@ -66,23 +70,23 @@ public class TenantService {
     }
 
 
-//    @Transactional(readOnly = true)
-//    public Page<DisplayCardListingDTO> search(Pageable pageable, SearchDTO newSearch) {
-//
-//        Page<Listing> allMatchedListings = listingRepository.findAllByLocationAndBathroomsAndBedroomsAndGuestsAndBeds(pageable, newSearch.location(),
-//                newSearch.infos().baths().value(),
-//                newSearch.infos().bedrooms().value(),
-//                newSearch.infos().guests().value(),
-//                newSearch.infos().beds().value());
-//
-//        List<UUID> listingUUIDs = allMatchedListings.stream().map(Listing::getPublicId).toList();
-//
-//        List<UUID> bookingUUIDs = bookingService.getBookingMatchByListingIdsAndBookedDate(listingUUIDs, newSearch.dates());
-//
-//        List<DisplayCardListingDTO> listingsNotBooked = allMatchedListings.stream().filter(listing -> !bookingUUIDs.contains(listing.getPublicId()))
-//                .map(listingMapper::listingToDisplayCardListingDTO)
-//                .toList();
-//
-//        return new PageImpl<>(listingsNotBooked, pageable, listingsNotBooked.size());
-//    }
+    @Transactional(readOnly = true)
+    public Page<DisplayCardListingDTO> search(Pageable pageable, SearchDTO newSearch) {
+
+        Page<Listing> allMatchedListings = listingRepository.findAllByLocationAndBathroomsAndBedroomsAndGuestsAndBeds(pageable, newSearch.location(),
+                newSearch.infos().baths().value(),
+                newSearch.infos().bedrooms().value(),
+                newSearch.infos().guests().value(),
+                newSearch.infos().beds().value());
+
+        List<UUID> listingUUIDs = allMatchedListings.stream().map(Listing::getPublicId).toList();
+
+        List<UUID> bookingUUIDs = bookingService.getBookingMatchByListingIdsAndBookedDate(listingUUIDs, newSearch.dates());
+
+        List<DisplayCardListingDTO> listingsNotBooked = allMatchedListings.stream().filter(listing -> !bookingUUIDs.contains(listing.getPublicId()))
+                .map(listingMapper::listingToDisplayCardListingDTO)
+                .toList();
+
+        return new PageImpl<>(listingsNotBooked, pageable, listingsNotBooked.size());
+    }
 }

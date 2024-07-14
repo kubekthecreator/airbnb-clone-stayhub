@@ -2,7 +2,7 @@ spring:
   liquibase:
     contexts: dev
   datasource:
-    url: jdbc:postgresql://localhost:5432/airbnb_clone
-    username: postgres
-    password: perdziak1229
+    url: jdbc:postgresql://${DATABASE_URL:localhost}:${DATABASE_PORT:5432}/${DATABASE_NAME:airbnb_clone}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:perdziak1229}
     driver-class-name: org.postgresql.Driver
